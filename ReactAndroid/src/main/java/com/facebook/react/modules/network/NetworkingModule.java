@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,6 +43,7 @@ import okhttp3.JavaNetCookieJar;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -80,13 +82,14 @@ public final class NetworkingModule extends ReactContextBaseJavaModule {
       @Nullable List<NetworkInterceptorCreator> networkInterceptorCreators) {
     super(reactContext);
 
-    if (networkInterceptorCreators != null) {
-      OkHttpClient.Builder clientBuilder = client.newBuilder();
-      for (NetworkInterceptorCreator networkInterceptorCreator : networkInterceptorCreators) {
-        clientBuilder.addNetworkInterceptor(networkInterceptorCreator.create());
-      }
-      client = clientBuilder.build();
-    }
+    OkHttpClient.Builder clientBuilder = client.newBuilder();
+    List<Protocol> protocolList = new ArrayList<>();
+    protocolList.add(Protocol.HTTP_1_1);
+
+    clientBuilder = clientBuilder.protocols(protocolList);
+
+    client = clientBuilder.build();
+
     mClient = client;
     mCookieHandler = new ForwardingCookieHandler(reactContext);
     mCookieJarContainer = (CookieJarContainer) mClient.cookieJar();
